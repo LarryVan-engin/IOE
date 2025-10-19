@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Đăng ký tài khoản</title>
+    <style>
+    /* ================= RESET ================= */
+    * { box-sizing: border-box; margin:0; padding:0; font-family: "Segoe UI", sans-serif; }
+
+    body {
+        background: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh; 
+        padding: 20px;
+        flex-direction: column;
+    }
+
+    /* Header */
+    header {
+        width: 100%;
+        max-width: 420px;
+        background: #2b3a55;
+        padding: 15px 20px;
+        border-radius: 12px 12px 0 0;
+        color: white;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 700;
+        box-shadow: 0 6px 15px rgba(43,58,85,0.25);
+    }
+
+    /* FORM CONTAINER */
+    .register-container {
+        background: white;
+        padding: 30px 40px 40px 40px;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15); 
+        width: 100%; 
+        max-width: 420px; 
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .register-container:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    }
+
+    .register-container h2 {
+        text-align: center;
+        margin-bottom: 25px; 
+        color: #2b3a55;
+    }
+
+    .register-container form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px; 
+    }
+
+    .register-container input {
+        width: 100%; 
+        padding: 12px; 
+        border-radius: 8px; 
+        border: 1px solid #d1d5db; 
+        font-size: 16px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .register-container input:focus {
+        border-color: #2b3a55; 
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(43, 58, 85, 0.2);
+    }
+
+    .register-container button {
+        padding: 14px; 
+        border-radius: 8px; 
+        border: none;
+        background: #2b3a55;
+        color: white;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background 0.3s, box-shadow 0.3s;
+    }
+    .register-container button:hover:not(:disabled) { /* Thêm :not(:disabled) */
+        background: #1f2b44;
+        box-shadow: 0 6px 15px rgba(43, 58, 85, 0.4);
+    }
+    .register-container button:disabled { /* CSS cho trạng thái disabled */
+        background: #aab5c9;
+        cursor: not-allowed;
+    }
+
+    .register-container .link, .register-container .back-home {
+        text-align: center;
+        margin-top: 20px; 
+        font-size: 14px;
+    }
+
+    .register-container .link a, .register-container .back-home a {
+        color: #2b3a55;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .register-container .link a:hover, .register-container .back-home a:hover {
+        text-decoration: underline;
+    }
+
+    /* Nút về trang chủ */
+    .back-home {
+        margin-bottom: 15px;
+    }
+
+    /* Thông báo lỗi */
+    .error-message {
+        color: #dc3545;
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+    </style>
+</head>
+<body>
+    <header>Đăng ký tài khoản</header>
+
+    <div class="register-container">
+        <div class="back-home">
+            <a href="login.html" title="Quay về trang đăng nhập">← Quay về trang Đăng nhập</a>
+        </div>
+        
+        <div id="general-error" class="error-message" style="display: none;"></div>
+
+        <form id="register-form" method="post">
+            <input type="text" name="fullname" placeholder="Họ và tên" required autocomplete="name">
+            <input type="text" name="username" placeholder="Tên người dùng" required autocomplete="username">
+            <input type="email" name="email" placeholder="Địa chỉ Email" required autocomplete="email">
+            <input type="tel" name="phone" placeholder="Số điện thoại" required autocomplete="tel">
+            <input type="password" id="password" name="password" placeholder="Mật khẩu" required autocomplete="new-password">
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Xác thực mật khẩu" required autocomplete="new-password">
+            <button type="submit" id="register-button">Đăng ký</button>
+        </form>
+        
+        <div class="link">
+            Đã có tài khoản? <a href="login.html">Đăng nhập</a>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const form = e.target;
+        const button = document.getElementById('register-button');
+        const generalError = document.getElementById('general-error');
+        
+        // Lấy giá trị form
+        const fullname = form.querySelector('input[name="fullname"]').value;
+        const username = form.querySelector('input[name="username"]').value;
+        const email = form.querySelector('input[name="email"]').value;
+        const phone = form.querySelector('input[name="phone"]').value;
+        const password = form.querySelector('input[name="password"]').value;
+        const confirmPassword = form.querySelector('input[name="confirm_password"]').value;
+        
+        // Ẩn thông báo lỗi cũ
+        generalError.style.display = 'none';
+
+        // 1. Kiểm tra khớp mật khẩu (CLIENT-SIDE VALIDATION)
+        if (password !== confirmPassword) { 
+            generalError.innerText = "Mật khẩu và Xác thực mật khẩu không khớp. Vui lòng kiểm tra lại!";
+            generalError.style.display = 'block';
+            document.getElementById('password').focus();
+            return; 
+        }
+
+        // 2. Bắt đầu quá trình Loading
+        button.disabled = true;
+        button.innerText = 'Đang xử lý...';
+
+        try {
+            // 3. Gửi Fetch API
+            const res = await fetch('http://localhost:8000/v1/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    fullname,
+                    username, 
+                    email, 
+                    phone,
+                    password 
+                }),
+                credentials: "include"
+            });
+
+            // 4. Xử lý phản hồi
+            if (!res.ok) {
+                const err = await res.json();
+                generalError.innerText = err.message || 'Đăng ký thất bại. Vui lòng kiểm tra dữ liệu.'; 
+                generalError.style.display = 'block';
+                // Đặt lại trạng thái nút
+                button.disabled = false;
+                button.innerText = 'Đăng ký';
+                return;
+            }
+            
+            // 5. Đăng ký thành công
+            alert('Đăng ký thành công! Vui lòng Đăng nhập để tiếp tục.');
+            window.location.href = 'D:\Larry\IC&AIOT_LAB\CHICOM\smtp-main\front_end\login.html'; // Chuyển hướng đến login.html
+            
+        } catch (err) {
+            console.error('Lỗi mạng hoặc server:', err);
+            generalError.innerText = 'Đã xảy ra lỗi kết nối mạng. Vui lòng thử lại.';
+            generalError.style.display = 'block';
+            // Đặt lại trạng thái nút
+            button.disabled = false;
+            button.innerText = 'Đăng ký';
+        }
+    });
+    </script>
+</body>
+</html>

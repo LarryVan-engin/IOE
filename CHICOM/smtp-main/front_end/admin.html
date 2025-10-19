@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Admin Dashboard</title>
+    <style>
+    /* ================= CSS VARIABLES (Cải tiến) ================= */
+    :root {
+        --color-primary-dark: #2b3a55;
+        --color-sidebar-bg: #1e2a3a;
+        --color-accent-hover: #30475e;
+        --color-error: #dc3545;
+        --color-text-light: white;
+        --color-bg-light: #f5f6fa;
+        --color-blue-accent: #3b82f6;
+    }
+
+    /* ================= RESET (Cải tiến) ================= */
+    * { 
+        box-sizing: border-box; 
+        margin:0; 
+        padding:0; 
+    }
+    body { 
+        background: var(--color-bg-light); 
+        font-family: "Segoe UI", sans-serif; /* Áp dụng font tại đây */
+    }
+
+    /* ================= HEADER ================= */
+    .header {
+        display: flex; justify-content: space-between; align-items: center;
+        background: var(--color-primary-dark); color: var(--color-text-light); 
+        padding: 15px 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        height: 60px; /* Xác định rõ chiều cao header */
+    }
+    .header .logo { font-weight: bold; font-size: 1.1em; }
+    .header .title { font-size: 16px; margin-left: 15px; }
+    .header .user-info { display: flex; align-items: center; gap: 15px; }
+    .header .user-info span { font-size: 0.9em; }
+    .logout-btn {
+        background: var(--color-error); color: var(--color-text-light); 
+        border: none; border-radius: 6px;
+        padding: 8px 14px; cursor: pointer; font-weight: bold; transition:0.2s;
+        white-space: nowrap; 
+    }
+    .logout-btn:hover { background: #b02a37; }
+
+    /* ================= LAYOUT 3 CỘT ================= */
+    .layout {
+        display: grid;
+        grid-template-columns: 220px 1fr 250px; /* sidebar | main | stats */
+        height: calc(100vh - 60px); /* 60px là chiều cao của header */
+        gap: 15px;
+        padding: 15px; 
+    }
+
+    /* ================= SIDEBAR ================= */
+    .sidebar { 
+        background: var(--color-sidebar-bg); 
+        color: var(--color-text-light); 
+        border-radius: 10px; 
+        padding-top:20px; 
+        overflow-y: auto; 
+    }
+    .sidebar ul { list-style: none; }
+    .sidebar li { 
+        padding: 14px 20px; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        font-size: 0.95em;
+        display: flex; /* Cải thiện: Dùng flex để dễ thêm icon sau này */
+        align-items: center;
+        gap: 10px;
+    }
+    .sidebar li:hover, .sidebar li.active { background: var(--color-accent-hover); }
+
+    /* ================= MAIN CONTENT & STATS ================= */
+    .main-content { padding:0; overflow-y:auto; } 
+    .main-content h2 { margin-bottom: 20px; color: var(--color-primary-dark); }
+    .panel { 
+        margin-top:0; 
+        background:white; 
+        padding:20px; 
+        border-radius:10px; 
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
+        margin-bottom: 15px; /* Thêm khoảng cách giữa các panel */
+    }
+    .panel h3 { margin-bottom:15px; color:#333; }
+    .panel ul { list-style:none; }
+    .panel li { 
+        margin:10px 0; 
+        padding-left: 10px; /* Tăng padding để thanh dọc đẹp hơn */
+        border-left: 4px solid var(--color-blue-accent); /* Dấu đầu dòng đẹp hơn */
+        font-size: 0.95em;
+    }
+    .stats-overview {
+        padding: 0;
+        overflow-y:auto;
+    }
+    .card {
+        background:white; padding:20px; border-radius:10px;
+        box-shadow:0 2px 6px rgba(0,0,0,0.1); text-align:center; margin-bottom: 15px;
+    }
+    .card h3 { color:#777; font-size:14px; margin-bottom: 5px; text-transform: uppercase; }
+    .card p { font-size:24px; font-weight:bold; margin-top:5px; color: var(--color-primary-dark); }
+
+
+    /* ================= RESPONSIVE (FOR MOBILE/TABLET) ================= */
+    @media (max-width: 900px) {
+        .header { 
+            padding: 10px 20px; 
+        }
+        .header .user-info span { display: none; } 
+
+        .layout {
+            grid-template-columns: 1fr; 
+            height: auto; 
+            padding: 10px;
+        }
+
+        .sidebar {
+            width: 100%;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .sidebar ul {
+            display: flex; 
+            overflow-x: auto; 
+            padding-bottom: 5px;
+            padding-right: 15px; /* Cải tiến: Thêm padding để dễ cuộn */
+        }
+        .sidebar li { 
+            padding: 8px 15px; 
+            white-space: nowrap; 
+            border-radius: 6px;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            /* Thay vì ẩn stats, ta đặt nó lên trên main content trên di động */
+            order: 1; 
+        }
+        .main-content {
+            order: 2; /* Main content xuống dưới stats trên di động */
+        }
+        .card { margin-bottom: 0; } /* Loại bỏ margin-bottom trên di động vì đã có gap */
+    }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <span>ADMIN DASHBOARD</span>
+            <span class="title">Bảng Điều Khiển</span>
+        </div>
+        <div class="user-info">
+            <span>Xin chào, Admin!</span>
+            <button class="logout-btn" onclick="logout()">Đăng Xuất</button>
+        </div>
+    </div>
+
+    <div class="layout">
+        
+        <div class="sidebar">
+            <ul>
+                <li class="active">Dashboard</li>
+                <li>Quản Lý Sản Phẩm</li>
+                <li>Quản Lý Đơn Hàng</li>
+                <li>Quản Lý Người Dùng</li>
+                <li>Phân Tích Dữ Liệu</li>
+                <li>Thiết Lập Chung</li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <h2>Tổng Quan Hệ Thống</h2>
+
+            <div class="panel">
+                <h3>Hoạt Động Gần Đây</h3>
+                <ul>
+                    <li>Đơn hàng mới #1234 đã được đặt (Khách: Nguyễn Văn A)</li>
+                    <li>Người dùng mới đăng ký: user@example.com</li>
+                    <li>Cập nhật trạng thái đơn hàng #1230 thành "Đã giao"</li>
+                </ul>
+            </div>
+
+            <div class="panel">
+                <h3>Báo Cáo Hàng Ngày</h3>
+                <ul>
+                    <li>Lượt truy cập: 4,500 (+12% so với hôm qua)</li>
+                    <li>Doanh thu hôm nay: 50,000,000 VNĐ</li>
+                    <li>Tỷ lệ chuyển đổi: 3.5%</li>
+                </ul>
+            </div>
+            
+        </div>
+
+        <div class="stats-overview">
+            <div class="card">
+                <h3>Tổng Đơn Hàng</h3>
+                <p>1,250</p>
+            </div>
+            <div class="card">
+                <h3>Doanh Thu Tháng</h3>
+                <p>980M VNĐ</p>
+            </div>
+            <div class="card">
+                <h3>Người Dùng Mới</h3>
+                <p>85</p>
+            </div>
+            <div class="card">
+                <h3>Sản Phẩm</h3>
+                <p>256</p>
+            </div>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+</body>
+</html>

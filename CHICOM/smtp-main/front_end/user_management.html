@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý người dùng - Admin</title>
+    <style>
+        /* ================= CSS VARIABLES ================= */
+        :root {
+            --color-primary-dark: #2b3a55; /* Header background */
+            --color-error: #dc3545; /* Logout button red */
+            --color-text-light: white;
+            --color-bg-light: #f5f6fa;
+        }
+
+        /* ------------------------------ */
+        /* TOÀN TRANG (RESET & CƠ BẢN) */
+        /* ------------------------------ */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: "Segoe UI", sans-serif; 
+            background: var(--color-bg-light); 
+            min-height: 100vh; /* Đảm bảo chiều cao tối thiểu */
+        }
+        
+        /* ------------------------------ */
+        /* HEADER (Thành phần mới) */
+        /* ------------------------------ */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--color-primary-dark); color: var(--color-text-light); 
+            padding: 15px 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            height: 60px;
+            margin-bottom: 20px; /* Thêm khoảng cách với nội dung chính */
+        }
+        .header .logo a { font-weight: bold; font-size: 1.1em; color: white; text-decoration: none; }
+        .header .title { font-size: 16px; margin-left: 15px; display: inline-block; }
+        .header .user-info { display: flex; align-items: center; gap: 15px; }
+        .header .user-info span { font-size: 0.9em; }
+
+        .logout-btn {
+            background: var(--color-error); color: var(--color-text-light); 
+            border: none; border-radius: 6px;
+            padding: 8px 14px; cursor: pointer; font-weight: bold; transition:0.2s;
+            white-space: nowrap; 
+            text-decoration: none; /* Quan trọng cho thẻ <a> */
+            display: inline-block;
+        }
+        .logout-btn:hover { background: #b02a37; }
+
+        /* ------------------------------ */
+        /* MAIN CONTENT (Điều chỉnh nhẹ) */
+        /* ------------------------------ */
+        .main-content {
+            padding: 0 20px;
+        }
+        h2 { color: var(--color-primary-dark); margin-bottom: 20px; }
+        .table-container { 
+            overflow-x: auto;
+        }
+        table { 
+            min-width: 800px;
+            width:100%; 
+            border-collapse:collapse; 
+            background:white; 
+            border-radius:10px; 
+            overflow:hidden; 
+            box-shadow:0 4px 10px rgba(0,0,0,0.1); 
+        }
+        th, td { 
+            padding:14px 12px; 
+            text-align:left; 
+            border-bottom:1px solid #eee; 
+            vertical-align: middle;
+            font-size: 0.95em;
+        }
+        th { 
+            background: var(--color-primary-dark); 
+            color: var(--color-text-light); 
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+        }
+
+        /* Status Tags & Action Buttons (Giữ nguyên) */
+        .status-tag { padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 0.8em; display: inline-block; }
+        .status-pending { background-color: #ffc107; color: #333; }
+        .status-active { background-color: #28a745; color: white; }
+        .status-blocked { background-color: #dc3545; color: white; }
+        .action-buttons { display: flex; gap: 8px; }
+        button { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; transition:background 0.2s, transform 0.1s; font-size: 0.9em; }
+        button:active { transform: scale(0.98); }
+        .activate { background:#28a745; color:white; }
+        .activate:hover { background:#1e7e34; }
+        .block { background:#dc3545; color:white; }
+        .block:hover { background:#b02a37; }
+        
+        /* Responsive (Thêm header ẩn/hiện) */
+        @media (max-width: 600px) {
+             .header .title { display: none; }
+             .header .user-info span { display: none; }
+             .header { padding: 10px 15px; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <a href="admin.html">ADMIN PANEL</a>
+            <span class="title">Quản lý người dùng</span>
+        </div>
+        <div class="user-info">
+            <span id="welcome-message">Xin chào, Admin!</span>
+            <button class="logout-btn" type="button" onclick="logout()">Đăng Xuất</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h2>Danh sách Người dùng</h2>
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>ID</th><th>Họ tên</th><th>Email</th><th>SĐT</th><th>Trạng thái</th><th>Hành động</th>
+                </tr>
+                <tr>
+                    <td>101</td><td>Nguyễn Văn A</td><td>a@example.com</td><td>0901234567</td>
+                    <td><span class="status-tag status-pending">Chờ kích hoạt</span></td>
+                    <td class="action-buttons">
+                        <button class="activate" onclick="handleAction(101, 'activate')">Kích hoạt</button>
+                        <button class="block" onclick="handleAction(101, 'block')">Khóa</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>102</td><td>Trần Thị B</td><td>b@example.com</td><td>0912345678</td>
+                    <td><span class="status-tag status-active">Đang hoạt động</span></td>
+                    <td class="action-buttons">
+                        <button class="block" onclick="handleAction(102, 'block')">Khóa</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>103</td><td>Lê Văn C</td><td>c@example.com</td><td>0987654321</td>
+                    <td><span class="status-tag status-blocked">Đã khóa</span></td>
+                    <td class="action-buttons">
+                        <button class="activate" onclick="handleAction(103, 'activate')">Mở khóa</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+<script>
+    // Hàm xử lý hành động (Giữ nguyên)
+    function handleAction(userId, actionType) {
+        let actionName = actionType === 'activate' ? 'KÍCH HOẠT' : 'KHÓA';
+        if (confirm(`Bạn có chắc chắn muốn ${actionName} người dùng ID ${userId} không?`)) {
+            // Thực hiện fetch API tại đây
+            alert(`Đã gửi yêu cầu ${actionType} cho người dùng ${userId}.`);
+        }
+    }
+
+    // Hàm Đăng xuất (Đã thêm)
+    function logout() {
+        const confirmLogout = confirm("Bạn có muốn đăng xuất khỏi hệ thống không?");
+        if (confirmLogout) {
+            // Xóa token truy cập khỏi Local Storage
+            localStorage.removeItem('accessToken'); 
+            
+            // Chuyển hướng về trang đăng nhập (thay đổi /login bằng URL thực tế)
+            window.location.href = "D:\Larry\IC&AIOT_LAB\CHICOM\smtp-main\front_end\login.html"; 
+        }
+    }
+    
+    // Hàm giả định để cập nhật tên người dùng (Nếu bạn có dùng auth.js)
+    // Nếu bạn muốn hiển thị tên người dùng thực, bạn cần dùng Fetch API tương tự như ví dụ trước
+    window.onload = function() {
+        // Giả sử tên người dùng được lưu trong localStorage
+        const userName = localStorage.getItem('username') || 'Admin'; 
+        const welcomeElement = document.getElementById('welcome-message');
+        if (welcomeElement) {
+            welcomeElement.innerText = `Xin chào, ${userName}!`;
+        }
+    };
+</script>
+<script src="js/auth.js"></script>
+</body>
+</html>

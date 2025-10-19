@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<title>Quản lý Thanh toán - Admin</title>
+<style>
+/* ================= CSS VARIABLES ================= */
+:root {
+    --color-primary-dark: #2b3a55; /* Header background & table header */
+    --color-error: #dc3545; /* Logout button red */
+    --color-text-light: white;
+    --color-bg-light: #f5f6fa;
+}
+
+/* ------------------------------ */
+/* TOÀN TRANG (RESET & CƠ BẢN) */
+/* ------------------------------ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+    font-family: "Segoe UI", sans-serif; 
+    background: var(--color-bg-light); 
+    min-height: 100vh;
+}
+
+/* ------------------------------ */
+/* HEADER (THÀNH PHẦN BỔ SUNG) */
+/* ------------------------------ */
+.header {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--color-primary-dark); color: var(--color-text-light); 
+    padding: 15px 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    height: 60px;
+    margin-bottom: 20px;
+}
+.header .logo a { font-weight: bold; font-size: 1.1em; color: white; text-decoration: none; }
+.header .title { font-size: 16px; margin-left: 15px; display: inline-block; }
+.header .user-info { display: flex; align-items: center; gap: 15px; }
+.header .user-info span { font-size: 0.9em; }
+
+.logout-btn {
+    background: var(--color-error); color: var(--color-text-light); 
+    border: none; border-radius: 6px;
+    padding: 8px 14px; cursor: pointer; font-weight: bold; transition:0.2s;
+    white-space: nowrap; 
+    text-decoration: none;
+    display: inline-block;
+}
+.logout-btn:hover { background: #b02a37; }
+
+/* ------------------------------ */
+/* MAIN CONTENT (Điều chỉnh nhẹ) */
+/* ------------------------------ */
+.main-content {
+    padding: 0 30px; /* Điều chỉnh padding chính để khớp với body padding cũ */
+}
+h2 { color: var(--color-primary-dark); margin-bottom: 20px; }
+.table-container { 
+    overflow-x: auto;
+}
+
+/* Thiết lập cho bảng */
+table { 
+    min-width: 700px;
+    width:100%; 
+    border-collapse:collapse; 
+    background:white; 
+    border-radius:10px; 
+    overflow:hidden; 
+    box-shadow:0 4px 12px rgba(0,0,0,0.08); 
+}
+th, td { padding:12px; text-align:left; border-bottom:1px solid #eee; }
+th { 
+    background: var(--color-primary-dark); 
+    color: var(--color-text-light); 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    font-size: 0.9em;
+}
+
+/* Thiết lập cho nút Hành động */
+button { 
+    padding:8px 14px;
+    border:none; 
+    border-radius:6px; 
+    cursor:pointer; 
+    transition:background 0.2s, transform 0.1s; 
+    margin-right:5px;
+    font-size: 0.9em;
+}
+button:active {
+    transform: scale(0.98);
+}
+.confirm { background:#28a745; color:white; }
+.confirm:hover { background:#1e7e34; }
+.reject { background:#dc3545; color:white; }
+.reject:hover { background:#b02a37; }
+
+/* Thiết lập cho Trạng thái */
+.status-tag {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85em;
+    display: inline-block;
+}
+.status-pending { 
+    background-color: #ffc107; 
+    color: #333;
+}
+.status-success {
+    background-color: #28a745; 
+    color: white;
+}
+
+/* Responsive (Thêm header ẩn/hiện) */
+@media (max-width: 600px) {
+    .header .title { display: none; }
+    .header .user-info span { display: none; }
+    .header { padding: 10px 15px; }
+    .main-content { padding: 0 15px; } /* Giảm padding chính */
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        <a href="admin.html">ADMIN PANEL</a>
+        <span class="title">Quản lý Thanh toán</span>
+    </div>
+    <div class="user-info">
+        <span id="welcome-message">Xin chào, Admin!</span>
+        <button class="logout-btn" type="button" onclick="logout()">Đăng Xuất</button>
+    </div>
+</div>
+
+<div class="main-content">
+    <h2>Quản lý thanh toán</h2>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Mã GD</th><th>Người dùng</th><th>Số tiền</th><th>Trạng thái</th><th>Hành động</th>
+            </tr>
+            <tr>
+                <td>2053</td><td>Nguyễn Văn A</td><td>₫500,000</td>
+                <td><span class="status-tag status-pending">Chờ xác nhận</span></td>
+                <td>
+                    <button class="confirm" onclick="handleAction('confirm', 2053)">Xác nhận</button>
+                    <button class="reject" onclick="handleAction('reject', 2053)">Từ chối</button>
+                </td>
+            </tr>
+            <tr>
+                <td>2054</td><td>Trần Thị B</td><td>₫1,200,000</td>
+                <td><span class="status-tag status-success">Thành công</span></td>
+                <td>-</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+// Hàm xử lý hành động (Giữ nguyên)
+function handleAction(actionType, transactionId) {
+    if (confirm(`Bạn có chắc chắn muốn ${actionType === 'confirm' ? 'XÁC NHẬN' : 'TỪ CHỐI'} giao dịch ${transactionId} không?`)) {
+        // Đây là nơi bạn sẽ gọi API backend để xử lý hành động
+        alert(`Đã gửi yêu cầu ${actionType} cho giao dịch ${transactionId}.`);
+    }
+}
+
+// Hàm Đăng xuất (Đã thêm)
+function logout() {
+    const confirmLogout = confirm("Bạn có muốn đăng xuất khỏi hệ thống không?");
+    if (confirmLogout) {
+        // Xóa token truy cập khỏi Local Storage
+        localStorage.removeItem('accessToken'); 
+        
+        // Chuyển hướng về trang đăng nhập (thay đổi /login bằng URL thực tế)
+        window.location.href = "D:\Larry\IC&AIOT_LAB\CHICOM\smtp-main\front_end\login.html"; 
+    }
+}
+
+// Giả định để cập nhật tên người dùng khi trang tải
+window.onload = function() {
+    // Giả sử tên người dùng được lưu trong localStorage
+    const userName = localStorage.getItem('username') || 'Admin'; 
+    const welcomeElement = document.getElementById('welcome-message');
+    if (welcomeElement) {
+        welcomeElement.innerText = `Xin chào, ${userName}!`;
+    }
+};
+</script>
+<script src="js/auth.js"></script>
+</body>
+</html>

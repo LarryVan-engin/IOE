@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Đăng nhập - Hệ thống quản lý tài khoản</title>
+    <style>
+        /* Khôi phục màu nền Gradient Xanh Tím */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            /* ĐÃ SỬA: Khôi phục Gradient cũ */
+            background: linear-gradient(135deg, #3b82f6, #9333ea); 
+            min-height: 100vh; /* Dùng min-height thay cho height để linh hoạt hơn */
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px; /* Thêm padding cho body */
+        }
+        .login-box {
+            background: white;
+            /* ĐÃ TĂNG: padding và bo tròn */
+            padding: 40px; 
+            border-radius: 12px;
+            /* ĐÃ TĂNG: shadow */
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3); 
+            width: 100%;
+            max-width: 380px; /* Giới hạn chiều rộng tối đa */
+        }
+        h2 { 
+            text-align: center; 
+            margin-bottom: 30px; /* Tăng khoảng cách dưới tiêu đề */
+            color: #1f2937; 
+        }
+        /* SỬA: Dùng form flexbox để quản lý khoảng cách */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        input {
+            width: 100%;
+            padding: 12px; /* Tăng padding input */
+            border: 1px solid #d1d5db;
+            border-radius: 8px; /* Tăng bo tròn input */
+            font-size: 16px;
+        }
+        input:focus {
+             border-color: #2563eb;
+             outline: none;
+             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+        button {
+            width: 100%;
+            /* ĐÃ SỬA: Khôi phục Gradient trên button */
+            background: linear-gradient(90deg, #2563eb, #7c3aed); 
+            color: white;
+            border: none;
+            padding: 12px; /* Tăng padding button */
+            border-radius: 8px; /* Tăng bo tròn button */
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: opacity 0.2s, box-shadow 0.2s;
+        }
+        button:hover { 
+            opacity: 0.9;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        .error {
+            color: #dc2626; /* Đỏ sẫm hơn */
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 25px; /* Tăng khoảng cách dưới cùng */
+            font-size: 14px;
+        }
+        .register-link a { 
+            color: #2563eb; 
+            text-decoration: none; 
+            font-weight: 600; /* In đậm link */
+        }
+        .register-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+
+<body>
+    <div class="login-box">
+        <h2>Đăng nhập Hệ thống</h2>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Địa chỉ Email" required autocomplete="email">
+            <input type="password" id="password" placeholder="Mật khẩu" required autocomplete="current-password">
+            <button type="submit">Đăng nhập</button>
+            <div id="error" class="error"></div>
+        </form>
+        <div class="register-link">
+            Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const errorDiv = document.getElementById('error');
+        errorDiv.textContent = ''; // Xóa thông báo lỗi cũ
+
+        if (!email || !password) {
+            errorDiv.textContent = 'Vui lòng nhập đầy đủ email và mật khẩu!';
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:8000/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+                credentials: "include" // Cho phép cookie (refreshToken)
+            });
+
+            // Cố gắng parse JSON, nếu lỗi thì dùng text
+            let data;
+            try {
+                data = await res.json();
+            } catch {
+                const text = await res.text();
+                data = { message: text };
+            }
+
+            if (!res.ok) {
+                errorDiv.textContent = data.message || 'Sai tài khoản hoặc mật khẩu. Vui lòng thử lại!';
+                return;
+            }
+
+            // Lưu accessToken vào localStorage
+            localStorage.setItem('accessToken', data.accessToken);
+
+            // Lưu thông tin user (nếu cần dùng sau này)
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            // Chuyển hướng theo quyền (admin hoặc user)
+            if (data.user.admin) {
+                window.location.href = 'D:\Larry\IC&AIOT_LAB\CHICOM\smtp-main\front_end\admin.html';
+            } else {
+                window.location.href = 'D:/Larry/IC&AIOT_LAB/CHICOM/smtp-main/front_end/user_dashboard.html';
+            }
+
+        } catch (err) {
+            console.error('Lỗi kết nối:', err);
+            errorDiv.textContent = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại server backend.';
+        }
+    });
+    </script>
+
+</body>
+</html>
