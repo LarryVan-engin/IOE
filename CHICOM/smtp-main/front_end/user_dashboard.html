@@ -314,9 +314,72 @@
                 window.location.href = "./login.html";  
             }
         }
-        // Tải thông tin người dùng sau khi DOM đã được tải hoàn chỉnh
-        window.addEventListener("DOMContentLoaded", () => {
-        renderProducts(); loadUserInfo()
+        
+        async function loadTransactions() {
+            const accessToken = localStorage.getItem("accessToken");
+            if (!accessToken) return;
+
+            try {
+                const res = await fetch("http://localhost:8000/v1/orders/my", {
+                headers: {
+                    "Authorization": "Bearer " + accessToken,
+                    "Content-Type": "application/json"
+                }
+                });
+
+                const orders = await res.json();
+                const table = document.querySelector(".transaction-history table");
+                let html = `
+                <tr>
+                    <th>Mã GD</th>
+                    <th>Thời gian</th>
+                    <th>Gói</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+                `;
+
+                orders.forEach(order => {
+                const statusMap = {
+                    created: '<span class="status pending">Chờ thanh toán</span>',
+                    waiting_admin_confirm: '<span class="status pending">Chờ xác nhận</span>',
+                    confirmed: '<span class="status success">Thành công</span>',
+                    rejected: '<span class="status failed">Từ chối</span>'
+                };
+
+                const createdAt = new Date(order.createdAt).toLocaleDateString('vi-VN');
+                const firstItem = order.items[0]?.name || "N/A";
+                const actionBtn = order.status === "created"
+                    ? `<a href="payment.html?orderId=${order._id}"><button class="pay-btn">Thanh toán</button></a>`
+                    : "-";
+
+                html += `
+                    <tr>
+                    <td>#${order._id.slice(-4)}</td>
+                    <td>${createdAt}</td>
+                    <td>${firstItem}</td>
+                    <td>${statusMap[order.status] || order.status}</td>
+                    <td>${actionBtn}</td>
+                    </tr>
+                `;
+                });
+
+                table.innerHTML = html;
+
+            } catch (err) {
+                console.error("Lỗi tải danh sách đơn:", err);
+            }
+            }
+
+            // Gọi mỗi 5 giây để cập nhật realtime
+            setInterval(loadTransactions, 5000);
+
+            // Gọi lần đầu khi trang load
+            // Tải thông tin người dùng sau khi DOM đã được tải hoàn chỉnh
+            window.addEventListener("DOMContentLoaded", () => {
+            renderProducts();
+            loadUserInfo();
+            loadTransactions();
     });
     </script>
 

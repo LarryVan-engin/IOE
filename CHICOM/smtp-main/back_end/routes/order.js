@@ -15,4 +15,7 @@ router.get("/", middlewareController.verifyTokenAndAdminAuth, orderController.li
 // Admin confirm/reject
 router.post("/:id/admin-action", middlewareController.verifyTokenAndAdminAuth, orderController.adminConfirmOrder);
 
+//User xem danh sach don hang cua minh
+router.get("/my", middlewareController.verifyToken, orderController.getUserOrders);
+
 module.exports = router;
