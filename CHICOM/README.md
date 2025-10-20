@@ -1,3 +1,5 @@
+web nằm trong mục smtp-main/
+
 HỆ THỐNG WEB — USER / ADMIN MANAGEMENT & PAYMENT FLOW
 ________________________________________
 ⚙️ 1. CẤU TRÚC THƯ MỤC DỰ ÁN
