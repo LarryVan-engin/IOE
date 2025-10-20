@@ -3,46 +3,46 @@ ________________________________________
 ⚙️ 1. CẤU TRÚC THƯ MỤC DỰ ÁN
 📁 back_end/
 Chứa toàn bộ mã nguồn Node.js + Express + MongoDB + Email SMTP.
-back_end/
-│
-├── .env                              # Biến môi trường (DB, JWT, SMTP)
-├── index.js                          # File chính khởi động server
-├── package.json / package-lock.json  # Cấu hình thư viện npm
-├── test_mail.js                      # Script kiểm tra gửi mail SMTP
-│
-├── admin_model/                      # Controllers xử lý logic admin & user
-│   ├── authController.js             # Đăng ký, đăng nhập, refresh token, logout
-│   ├── middlewareController.js       # Xác thực JWT & quyền admin
-│   └── userController.js             # CRUD user, duyệt tài khoản, gửi mail
-│
-├── routes/                           # Định nghĩa các endpoint API
-│   ├── auth.js                       # /v1/auth (đăng nhập, đăng    ký, logout)
-│   ├── user.js                       # /v1/user (user info, admin delete)
-│   ├── order.js                      # /v1/order (quản lý đơn hàng & thanh toán)
-│
-├── user_model/                       # Mongoose models
-│   └── User.js                       # Định nghĩa schema người dùng
-│
-├── models/
-│   └── Order.js                      # Định nghĩa schema đơn hàng (thanh toán)
-│
-└── utils/
-    └── mailer.js                     # Hàm gửi mail (dùng nodemailer)
+	back_end/
+	│
+	├── .env                              # Biến môi trường (DB, JWT, SMTP)
+	├── index.js                          # File chính khởi động server
+	├── package.json / package-lock.json  # Cấu hình thư viện npm
+	├── test_mail.js                      # Script kiểm tra gửi mail SMTP
+	│
+	├── admin_model/                      # Controllers xử lý logic admin & user
+	│   ├── authController.js             # Đăng ký, đăng nhập, refresh token, logout
+	│   ├── middlewareController.js       # Xác thực JWT & quyền admin
+	│   └── userController.js             # CRUD user, duyệt tài khoản, gửi mail
+	│
+	├── routes/                           # Định nghĩa các endpoint API
+	│   ├── auth.js                       # /v1/auth (đăng nhập, đăng    ký, logout)
+	│   ├── user.js                       # /v1/user (user info, admin delete)
+	│   ├── order.js                      # /v1/order (quản lý đơn hàng & thanh toán)
+	│
+	├── user_model/                       # Mongoose models
+	│   └── User.js                       # Định nghĩa schema người dùng
+	│
+	├── models/
+	│   └── Order.js                      # Định nghĩa schema đơn hàng (thanh toán)
+	│
+	└── utils/
+	    └── mailer.js                     # Hàm gửi mail (dùng nodemailer)
 ________________________________________
 🌐 front_end/
 Chứa giao diện người dùng (HTML + JS thuần).
-front_end/
-│
-├── admin.html              # Giao diện chính admin dashboard
-├── user_management.html     # Quản lý user, duyệt tài khoản
-├── payment_management.html  # Quản lý đơn hàng chờ xác nhận thanh toán
-├── user_dashboard.html      # Trang user: hiển thị sản phẩm, mua hàng
-├── payment.html             # Trang thanh toán (QR, xác nhận)
-├── login.html               # Đăng nhập
-├── register.html            # Đăng ký
-│
-└── js/
-    └── auth.js              # Xử lý login, register, token
+	front_end/
+	│
+	├── admin.html              # Giao diện chính admin dashboard
+	├── user_management.html     # Quản lý user, duyệt tài khoản
+	├── payment_management.html  # Quản lý đơn hàng chờ xác nhận thanh toán
+	├── user_dashboard.html      # Trang user: hiển thị sản phẩm, mua hàng
+	├── payment.html             # Trang thanh toán (QR, xác nhận)
+	├── login.html               # Đăng nhập
+	├── register.html            # Đăng ký
+	│
+	└── js/
+	    └── auth.js              # Xử lý login, register, token
 ________________________________________
 🔄 2. WORKFLOW — LUỒNG HOẠT ĐỘNG HỆ THỐNG
 sequenceDiagram
