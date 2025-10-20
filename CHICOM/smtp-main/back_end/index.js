@@ -6,6 +6,9 @@ const cookieParser = require("cookie-parser");
 const authRoute = require("./routes/auth");
 const userRoute = require("./routes/user");
 const path = require("path");
+const morgan = require("morgan");
+const orderRoute = require("./routes/order");
+
 
 dotenv.config();
 const app = express();
@@ -27,7 +30,7 @@ connect_MONGODB();
 
 //Dung express de chay html, khong can chay Flask
 app.use(cors({
-  origin: "http://127.0.0.1:5500", //Flask front_end
+  //origin: "http://localhost:5500", //Flask front_end
   credentials: true
 }));
 app.use(cookieParser());
@@ -38,10 +41,16 @@ app.use("/v1/auth", authRoute);
 app.use("/v1/user", userRoute);
 app.get("/", (req, res)=>{
   res.send("Server is running!");
-})
+});
 app.listen(8000, () => {
     console.log("Server is running");
 });
+app.use(express.static("../front_end"));
+app.use(morgan("dev"));
+
+app.use("/v1/orders", orderRoute);
+
+
 
 
 

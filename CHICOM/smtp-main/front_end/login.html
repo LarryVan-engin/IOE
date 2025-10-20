@@ -138,6 +138,7 @@
                 errorDiv.textContent = data.message || 'Sai tài khoản hoặc mật khẩu. Vui lòng thử lại!';
                 return;
             }
+            console.log("AccessToken: ", data.accessToken);
 
             // Lưu accessToken vào localStorage
             localStorage.setItem('accessToken', data.accessToken);
@@ -147,9 +148,9 @@
 
             // Chuyển hướng theo quyền (admin hoặc user)
             if (data.user.admin) {
-                window.location.href = 'D:\Larry\IC&AIOT_LAB\CHICOM\smtp-main\front_end\admin.html';
+                window.location.href = './admin.html';
             } else {
-                window.location.href = 'D:/Larry/IC&AIOT_LAB/CHICOM/smtp-main/front_end/user_dashboard.html';
+                window.location.href = './user_dashboard.html';
             }
 
         } catch (err) {

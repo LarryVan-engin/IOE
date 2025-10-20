@@ -184,6 +184,9 @@
             </div>
         </div>
 
+        <div id="products"></div>
+
+
         <div class="transaction-history">
             <h3>Lịch sử giao dịch</h3>
             <table>
@@ -206,7 +209,7 @@
                     <td>14/10/2025</td>
                     <td>Pro</td>
                     <td><span class="status pending">Chờ thanh toán</span></td>
-                    <td><a href="{{ url_for('payment') }}"><button class="pay-btn">Thanh toán</button></a></td>
+                    <td><a href="payment.html"><button class="pay-btn">Thanh toán</button></a></td>
                 </tr>
                 <tr>
                     <td>#003</td>
@@ -220,41 +223,102 @@
     </div>
     <script src="js/auth.js"></script>
     <script>
+        const PRODUCTS = [
+            { productId: "p1", name: "Gói Basic", price: 100000 },
+            { productId: "p2", name: "Gói Pro", price: 300000 },
+            { productId: "p3", name: "Gói Premium", price: 500000 }
+            ];
+
+        function renderProducts(){
+        const el = document.getElementById("products");
+        el.innerHTML = PRODUCTS.map(p => `
+            <div style="padding:10px;background:white;margin:8px;border-radius:8px;">
+            <h4>${p.name}</h4>
+            <p>Giá: ${p.price} VNĐ</p>
+            <button onclick='buy("${p.productId}")'>Mua</button>
+            </div>
+        `).join("");
+        }
+
+        async function buy(productId){
+        const product = PRODUCTS.find(p => p.productId === productId);
+        // tạo order backend
+        const res = await fetch("http://localhost:8000/v1/orders", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("accessToken")
+            },
+            credentials: "include",
+            body: JSON.stringify({ items:[{productId: product.productId, name: product.name, price: product.price, quantity:1}] })
+        });
+        const data = await res.json();
+        if(res.ok){
+            // redirect đến trang payment, kèm orderId trong query
+            window.location.href = `payment.html?orderId=${data.order._id}`;
+        } else {
+            alert(data.message || "Không thể tạo đơn hàng");
+        }
+        }
+
         async function loadUserInfo() {
             // Lấy token từ Local Storage
-            const token = localStorage.getItem('accessToken');
-            if (!token) {
+            const accessToken = localStorage.getItem('accessToken');
+            if (!accessToken) {
+
                 // Đảm bảo không alert/redirect ngay lập tức nếu script được tải sớm
                 console.log("Người dùng chưa đăng nhập.");
-                window.location.href = "http://127.0.0.1:5500/smtp-main/front_end/login.html"; // Có thể giữ lại nếu bạn muốn bảo vệ trang ngay lập tức
+               // window.location.href = "./login.html"; // Có thể giữ lại nếu bạn muốn bảo vệ trang ngay lập tức
                 return;
             }
 
             try {
                 // Thực hiện fetch đến endpoint user info
-                const res = await fetch('http://localhost:8000/v1/user', {
+                const res = await fetch(API_BASE + "/v1/user", {
+                    method: 'GET',
+                    credentials: 'include', // Giữ lại nếu bạn muốn gửi cả cookie (như refresh token)
                     headers: {
-                        'Authorization': 'Bearer ' + token
-                    },
-                    credentials: 'include' // Giữ lại nếu bạn muốn gửi cả cookie (như refresh token)
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + accessToken //  gửi accessToken
+                    }
                 });
 
                 if (!res.ok) throw new Error('Lỗi xác thực hoặc phiên hết hạn');
-                const user = await res.json();
                 
+                if (res.status === 401) {
+                    //Token hết hạn → tự động refresh
+                    const refreshed = await refreshAccessToken();
+                    if (refreshed) {
+                        return await loadUserInfo(); // Gọi lại chính hàm này sau khi refresh xong
+                    } else {
+                        alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!!!");
+                        window.location.href = "./login.html";
+                        return;
+                    }
+                }
+
+                const user = await res.json();
+                console.log("Thong tin user: ", user);
+
                 // Cập nhật tên người dùng
                 document.getElementById('fullname').innerText = user.fullname || user.username; 
                 document.getElementById('phone').innerText = user.phone ? `📞 ${user.phone}` : 'Chưa có số điện thoại'; 
             } catch (err) {
+                console.log(token);
+                console.log(err);
                 console.error("Lỗi tải thông tin user:", err);
                 // Nếu lỗi, giả định phiên hết hạn
                 alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!");
+                
                 localStorage.removeItem('accessToken'); // Xóa token cũ
-                window.location.href = "http://127.0.0.1:5500/smtp-main/front_end/login.html";
+                window.location.href = "./login.html";  
             }
         }
         // Tải thông tin người dùng sau khi DOM đã được tải hoàn chỉnh
-        window.addEventListener('DOMContentLoaded', () => loadUserInfo());
+        window.addEventListener("DOMContentLoaded", () => {
+        renderProducts(); loadUserInfo()
+    });
     </script>
+
 </body>
 </html>

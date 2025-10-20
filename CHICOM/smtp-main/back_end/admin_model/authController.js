@@ -1,6 +1,7 @@
 const User = require("../user_model/User");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const {sendMail}= require("../ultils/mailer");
 
 let refreshTokens = [];
 
@@ -17,11 +18,24 @@ const authController = {
                 email: req.body.email,
                 password: hashed,
                 fullname: req.body.fullname,
-                phone: req.body.phone
+                phone: req.body.phone,
+                status: "pending"
             });
 
             //Save to DB
             const user = await newUser.save();
+
+            // Optional: thông báo admin
+            try {
+                await sendMail({
+                to: process.env.ADMIN_EMAIL,
+                subject: `User mới đăng ký chờ duyệt: ${user.username}`,
+                html: `<p>Người dùng <b>${user.fullname}</b> (${user.email}) vừa đăng ký. Vui lòng vào admin để duyệt.</p>`
+                });
+            } catch (err) {
+                console.error("Mail notify admin failed:", err);
+            }
+            
             res.status(201).json({
                 message: "Registry successfully !",
                 user: {
@@ -29,11 +43,23 @@ const authController = {
                     username: user.username,
                     fullname: user.fullname,
                     email: user.email,
-                    phone: user.phone
+                    phone: user.phone,
+                    status: user.status
                 }
             });
         } catch (err) {
             console.log(err);
+            if (err.name == 'ValidationError'){
+                //Loi do du lieu nhap vao
+                return res.status(400).json({message: 'INvalidation data', errors: err.errors});
+            }
+            if (err.code === 11000) {
+                // Lỗi trùng khóa duy nhất trong MongoDB
+                return res.status(400).json({
+                message: `Tên đăng nhập hoặc email đã tồn tại. Vui lòng chọn tên khác.`,
+                field: Object.keys(err.keyPattern)[0]  // ví dụ 'username' hoặc 'email'
+                });
+            }
             res.status(500).json({message: "Server error", error: err});
         }
     },
@@ -87,9 +113,23 @@ const authController = {
                 return res.status(404).json("WRONG PASSWORD!");
             }
 
+            // trong loginUser (sau findOne và password check)
+            if (user.status !== "active") {
+                return res.status(403).json({ message: "Tài khoản chưa được kích hoạt hoặc bị khóa." });
+            }
+
+
             //Create TOKEN
             //Thiet lap token de bao mat login
             const accessToken = authController.generateAccessToken(user);
+            res.cookie("accessToken", accessToken, {
+                httpOnly: true,
+                secure: false,
+                path: "/",
+                sameSite: "strict",
+                maxAge: 15 * 60 * 1000, //15min
+                domain: "localhost"
+            });
 
             //Thiet lap refresh token
             const refreshToken = authController.generateRefreshToken(user);
@@ -102,7 +142,8 @@ const authController = {
                 secure: false, //Khi deploy https:// thi sua lai thanh true
                 path: "/",
                 sameSite: "strict",
-                maxAge: 10 * 24 * 60 * 60 * 1000 // 10 days in ms
+                maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days in ms
+                domain: "localhost"
             });
 
             // Thêm dòng này để trích xuất
@@ -115,6 +156,7 @@ const authController = {
                 refreshToken // <--- ĐÃ THÊM: Refresh Token
             });
         }catch(err){
+            console.log(err);
             res.status(500).json(err);
         }
     },
@@ -123,6 +165,8 @@ const authController = {
     requestRefreshToken: async(req, res) =>{
         //Lay refresh token tu user vi access token het han
         const refreshToken = req.cookies.refreshToken;
+        console.log("=========REQUEST TOKEN DEBUG============");
+        console.log("Receive refresh token from cookie:", refreshToken);
 
         //res.status(200).json(refreshToken);
         if(!refreshToken) return res.status(401).json("You are not authenticated!");

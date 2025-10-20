@@ -1,5 +1,5 @@
 // front_end/js/auth.js
-const API_BASE = "http://localhost:8000/v1";
+const API_BASE = "";
 
 // Gửi request API có tự động refresh token
 async function apiFetch(url, options = {}) {
@@ -40,7 +40,6 @@ async function refreshAccessToken() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ refreshToken })
     });
 
     if (!res.ok) return false;
@@ -57,5 +56,5 @@ async function refreshAccessToken() {
 function logout() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
-  window.location.href = "D:\Larry\IC&AIOT_LAB\CHICOM\smtp-main\front_end\login.html";
+  window.location.href = "./login.html";
 }

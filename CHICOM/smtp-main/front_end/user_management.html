@@ -151,37 +151,57 @@
     </div>
 
 <script>
-    // Hàm xử lý hành động (Giữ nguyên)
-    function handleAction(userId, actionType) {
-        let actionName = actionType === 'activate' ? 'KÍCH HOẠT' : 'KHÓA';
-        if (confirm(`Bạn có chắc chắn muốn ${actionName} người dùng ID ${userId} không?`)) {
-            // Thực hiện fetch API tại đây
-            alert(`Đã gửi yêu cầu ${actionType} cho người dùng ${userId}.`);
-        }
+    async function loadUsers() {
+    try {
+        const res = await fetch("http://localhost:8000/v1/user/all", {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("accessToken")
+        },
+        credentials: "include"
+        });
+        const users = await res.json();
+        const tbody = document.querySelector("table tbody") || document.querySelector("table");
+        // build table rows dynamically...
+        // Example:
+        let html = `<tr><th>ID</th><th>Họ tên</th><th>Email</th><th>SĐT</th><th>Trạng thái</th><th>Hành động</th></tr>`;
+        users.forEach(u => {
+        html += `<tr>
+            <td>${u._id}</td>
+            <td>${u.fullname}</td>
+            <td>${u.email}</td>
+            <td>${u.phone}</td>
+            <td>${u.status}</td>
+            <td>
+            ${u.status === 'pending' ? `<button onclick="accept('${u._id}')">Accept</button> <button onclick="reject('${u._id}')">Reject</button>` : '-'}
+            </td>
+        </tr>`;
+        });
+        document.querySelector(".table-container table").innerHTML = html;
+    } catch (e) { console.error(e); alert("Load users failed"); }
     }
 
-    // Hàm Đăng xuất (Đã thêm)
-    function logout() {
-        const confirmLogout = confirm("Bạn có muốn đăng xuất khỏi hệ thống không?");
-        if (confirmLogout) {
-            // Xóa token truy cập khỏi Local Storage
-            localStorage.removeItem('accessToken'); 
-            
-            // Chuyển hướng về trang đăng nhập (thay đổi /login bằng URL thực tế)
-            window.location.href = "D:\Larry\IC&AIOT_LAB\CHICOM\smtp-main\front_end\login.html"; 
-        }
+    async function accept(id) {
+    if (!confirm("Kích hoạt user?")) return;
+    await fetch(`http://localhost:8000/v1/user/accept/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + localStorage.getItem("accessToken") },
+        credentials: "include"
+    });
+    await loadUsers();
     }
-    
-    // Hàm giả định để cập nhật tên người dùng (Nếu bạn có dùng auth.js)
-    // Nếu bạn muốn hiển thị tên người dùng thực, bạn cần dùng Fetch API tương tự như ví dụ trước
-    window.onload = function() {
-        // Giả sử tên người dùng được lưu trong localStorage
-        const userName = localStorage.getItem('username') || 'Admin'; 
-        const welcomeElement = document.getElementById('welcome-message');
-        if (welcomeElement) {
-            welcomeElement.innerText = `Xin chào, ${userName}!`;
-        }
-    };
+
+    async function reject(id) {
+    if (!confirm("Từ chối user?")) return;
+    await fetch(`http://localhost:8000/v1/user/reject/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + localStorage.getItem("accessToken") },
+        credentials: "include"
+    });
+    await loadUsers();
+    }
+
+    window.onload = loadUsers;
 </script>
 <script src="js/auth.js"></script>
 </body>

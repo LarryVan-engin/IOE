@@ -130,27 +130,42 @@ button:hover {
 </div>
 
 <script>
-// Hàm Đăng xuất (Đã thêm)
-function logout() {
-    const confirmLogout = confirm("Bạn có muốn đăng xuất khỏi hệ thống không?");
-    if (confirmLogout) {
-        localStorage.removeItem('accessToken'); 
-        window.location.href = "smtp-main\front_end\login.html"; 
+    function getQuery(name){
+        const params = new URLSearchParams(location.search);
+        return params.get(name);
+        }
+    async function confirmPayment(){
+        const orderId = getQuery('orderId');
+        if(!orderId){ alert("Order ID missing"); return; }
+        const res = await fetch(`http://localhost:8000/v1/orders/${orderId}/confirm-payment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + localStorage.getItem("accessToken") },
+            credentials: "include"
+        });
+        const data = await res.json();
+        if(res.ok){
+            alert("Bạn đã xác nhận thanh toán. Đơn hàng đang chờ admin xác nhận.");
+            window.location.href = "user_dashboard.html";
+        } else {
+            alert(data.message || "Lỗi xác nhận");
+        }
     }
-}
 
-// Hàm xác nhận thanh toán (Giữ nguyên)
-function confirmPayment() {
-    alert("Thanh toán đã gửi, chờ admin xác nhận. Xin cảm ơn!");
-    document.querySelector('.payment-container button').disabled = true;
-    document.querySelector('.payment-container button').innerText = 'Đang chờ xử lý...';
-}
+// Hàm Đăng xuất (Đã thêm)
+    function logout() {
+        const confirmLogout = confirm("Bạn có muốn đăng xuất khỏi hệ thống không?");
+        if (confirmLogout) {
+            localStorage.removeItem('accessToken'); 
+            window.location.href = "smtp-main\front_end\login.html"; 
+        }
+    }
 
 // Giả sử tên người dùng được lưu trong localStorage (chỉ để giữ code chuẩn)
-window.onload = function() {
-    const userName = localStorage.getItem('username') || 'Khách hàng'; 
-    console.log(`Xin chào, ${userName}! Trang thanh toán đã tải.`);
-};
+    window.onload = function() {
+        const userName = localStorage.getItem('username') || 'Khách hàng'; 
+        console.log(`Xin chào, ${userName}! Trang thanh toán đã tải.`);
+    };
+
 </script>
 <script src="js/auth.js"></script>
 

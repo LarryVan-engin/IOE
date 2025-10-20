@@ -161,35 +161,61 @@ button:active {
 </div>
 
 <script>
-// Hàm xử lý hành động (Giữ nguyên)
-function handleAction(actionType, transactionId) {
-    if (confirm(`Bạn có chắc chắn muốn ${actionType === 'confirm' ? 'XÁC NHẬN' : 'TỪ CHỐI'} giao dịch ${transactionId} không?`)) {
-        // Đây là nơi bạn sẽ gọi API backend để xử lý hành động
-        alert(`Đã gửi yêu cầu ${actionType} cho giao dịch ${transactionId}.`);
+    
+    //load Order
+    async function loadOrders(){
+        const res = await fetch("http://localhost:8000/v1/orders?status=waiting_admin_confirm", {
+            headers: { "Authorization": "Bearer " + localStorage.getItem("accessToken") },
+            credentials: "include"
+        });
+        const orders = await res.json();
+        // render table
     }
-}
 
-// Hàm Đăng xuất (Đã thêm)
-function logout() {
-    const confirmLogout = confirm("Bạn có muốn đăng xuất khỏi hệ thống không?");
-    if (confirmLogout) {
-        // Xóa token truy cập khỏi Local Storage
-        localStorage.removeItem('accessToken'); 
-        
-        // Chuyển hướng về trang đăng nhập (thay đổi /login bằng URL thực tế)
-        window.location.href = "D:\Larry\IC&AIOT_LAB\CHICOM\smtp-main\front_end\login.html"; 
+    async function adminAction(orderId, action){
+        const res = await fetch(`http://localhost:8000/v1/orders/${orderId}/admin-action`, {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("accessToken")
+            },
+            credentials: "include",
+            body: JSON.stringify({ action })
+        });
+        if(res.ok) loadOrders();
+        else alert("Action failed");
     }
-}
 
-// Giả định để cập nhật tên người dùng khi trang tải
-window.onload = function() {
-    // Giả sử tên người dùng được lưu trong localStorage
-    const userName = localStorage.getItem('username') || 'Admin'; 
-    const welcomeElement = document.getElementById('welcome-message');
-    if (welcomeElement) {
-        welcomeElement.innerText = `Xin chào, ${userName}!`;
+
+    // Hàm xử lý hành động (Giữ nguyên)
+    function handleAction(actionType, transactionId) {
+        if (confirm(`Bạn có chắc chắn muốn ${actionType === 'confirm' ? 'XÁC NHẬN' : 'TỪ CHỐI'} giao dịch ${transactionId} không?`)) {
+            // Đây là nơi bạn sẽ gọi API backend để xử lý hành động
+            alert(`Đã gửi yêu cầu ${actionType} cho giao dịch ${transactionId}.`);
+        }
     }
-};
+
+    // Hàm Đăng xuất (Đã thêm)
+    function logout() {
+        const confirmLogout = confirm("Bạn có muốn đăng xuất khỏi hệ thống không?");
+        if (confirmLogout) {
+            // Xóa token truy cập khỏi Local Storage
+            localStorage.removeItem('accessToken'); 
+            
+            // Chuyển hướng về trang đăng nhập (thay đổi /login bằng URL thực tế)
+            window.location.href = "D:\Larry\IC&AIOT_LAB\CHICOM\smtp-main\front_end\login.html"; 
+        }
+    }
+    window.onload = loadOrders;
+    // Giả định để cập nhật tên người dùng khi trang tải
+    window.onload = function() {
+        // Giả sử tên người dùng được lưu trong localStorage
+        const userName = localStorage.getItem('username') || 'Admin'; 
+        const welcomeElement = document.getElementById('welcome-message');
+        if (welcomeElement) {
+            welcomeElement.innerText = `Xin chào, ${userName}!`;
+        }
+    };
 </script>
 <script src="js/auth.js"></script>
 </body>
