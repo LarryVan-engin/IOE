@@ -1,4 +1,4 @@
-web nằm trong mục smtp-main/
+<img width="1919" height="1079" alt="Screenshot 2025-10-20 164016" src="https://github.com/user-attachments/assets/1fe5d62e-534d-488d-ad34-7c8076bf4bb3" />web nằm trong mục smtp-main/
 
 HỆ THỐNG WEB — USER / ADMIN MANAGEMENT & PAYMENT FLOW
 ________________________________________
@@ -211,5 +211,88 @@ Không gửi được mail	Kiểm tra .env SMTP, App Password
 Lỗi CORS	Đặt origin: "http://localhost:5500" trong index.js
 Lỗi JWT hết hạn	Dùng API /v1/auth/refresh để lấy access token mới
 Không truy cập được HTML	Kiểm tra express.static("../front_end") đúng đường dẫn
+
+
+ 
+Đây chính là giao diện trang login.html để Đăng nhập
+Nếu chưa có tài khoản, chọn Đăng ký ngay
+
+<img width="1919" height="1079" alt="Screenshot 2025-10-20 164016" src="https://github.com/user-attachments/assets/f25143fe-f5c1-4afe-881e-0eebd0d9730d" />
+
+Đây là giao diện đăng ký tài khoản, điền các field (bắt buộc).
+
+<img width="1919" height="1079" alt="Screenshot 2025-10-20 164122" src="https://github.com/user-attachments/assets/39d0e389-438c-4f91-b418-6d8ab628a983" />
+
+TEST CASE:
+-	Nếu bỏ trống, báo lỗi
+-	Nếu nhập ‘Họ và tên’ :
+	+ dưới 4 ký tự, báo lỗi…
+	+ Trùng với tên có sẵn, báo lỗi
+-	Nếu nhập ‘Tên người dùng’:
+	+ dưới 4 ký tự, báo lỗi…
+	+ Trùng tên người khác, báo lỗi
+-	Nếu nhập địa chỉ email:
+	+ không đúng đuôi @domain, báo lỗi…
+	+ Trùng email có sẵn, báo lỗi
+-	Nếu nhập ‘Số điện thoại’: 
+	+ dưới 10 số, báo lỗi…
+	+ Trùng số điện thoại, báo lỗi…
+-	Nếu nhập mật khẩu: dưới 6 ký tự, báo lỗi
+-	Confirm mật khẩu: nhập sai, báo lỗi.
+ 
+Sau khi điền các fields và nhấn Đăng ký, web sẽ hiện thông báo Đăng ký thành công
+<img width="581" height="916" alt="Screenshot 2025-10-20 164935" src="https://github.com/user-attachments/assets/34e5c40d-365d-4d72-ba1f-f24b0bb93241" />
+
+Tuy nhiên sau bước Đăng ký này, user mới vẫn chưa được đăng nhập vào mà phải đợi admin duyệt tài khoản thì mới được đăng nhập.
+TEST: Nếu chưa được duyệt thì khi đăng nhập sẽ thế nào
+ <img width="638" height="574" alt="Screenshot 2025-10-20 165355" src="https://github.com/user-attachments/assets/e7498e59-9977-4255-9bf0-0c2aafc09f9f" />
+
+	Có thể thấy khi chưa được admin accept thì hệ thống sẽ không cho phép đăng nhập.
+ADMIN: 
+Sau khi user mới đăng ký thì admin sẽ được nhận thông báo qua mail:
+<img width="895" height="486" alt="Screenshot 2025-10-20 165545" src="https://github.com/user-attachments/assets/b199a4ca-ba34-4a62-a97a-9096af0f0bd0" />
+
+Với email admin được thiết lập sẵn, sau khi được nhận thông báo nêu rõ về user mới, ta Đăng nhập vào với tài khoản admin.
+ <img width="1919" height="966" alt="Screenshot 2025-10-20 165937" src="https://github.com/user-attachments/assets/cc8cdc69-a7a1-45ec-a99f-684e2950e628" />
+
+Giao diện tài khoản admin.html sẽ khác với giao diện của user_dashboard.html, có các mục Quản lý.
+Chọn Quản lý người dùng
+ <img width="1919" height="751" alt="Screenshot 2025-10-20 170152" src="https://github.com/user-attachments/assets/4195ae0f-d6f0-4393-acac-480cf47e13b0" />
+
+Ở đây ta sẽ thấy user mới đang hiện thông báo trạng thái là “pending” và cần admin chọn các tác vụ là Accept hay Reject
+TEST: Nếu chọn Reject, tài khoản mới sẽ bị xóa và không lưu lại trong hệ thống.
+<img width="1518" height="890" alt="Screenshot 2025-10-20 170438" src="https://github.com/user-attachments/assets/36db4b4c-7db3-44fc-a82d-5352ae8cdcd1" />
+	Nếu chọn Accept, tài khoản mới sẽ được chấp thuận đăng nhập vào user_dashboard
+ <img width="1906" height="1079" alt="Screenshot 2025-10-20 170456" src="https://github.com/user-attachments/assets/da71f60e-34a7-4c35-82a2-0980483a6c5e" />
+
+Giao diện user_dashboard sẽ có các mục giao dịch và thanh toán. Nếu chọn mua gói nào thì sẽ báo giá Xác nhận thanh toán, sau đó sẽ gửi Email thanh toán đến admin về giá gói hàng.
+ 
+
+ <img width="1919" height="1079" alt="Screenshot 2025-10-20 170644" src="https://github.com/user-attachments/assets/23f8f3fa-5917-4d46-9314-f1bbeceef66e" />
+
+Ngay lập tức tài khoản email admin sẽ nhận thông báo:
+ <img width="1175" height="652" alt="Screenshot 2025-10-20 170733" src="https://github.com/user-attachments/assets/26530641-deae-4495-bdfd-c32a332f47b1" />
+
+Sau khi nhận email, admin sẽ thao tác truy cập vào Quản lý đơn hàng để xem xét về đơn hàng:
+ <img width="1919" height="1058" alt="Screenshot 2025-10-20 174208" src="https://github.com/user-attachments/assets/f4f4a518-42b3-4cff-824c-10d2073ebd8e" />
+
+Vì đã mã hóa mã GD, chỉ xem được tên người dùng, có thể thấy các trạng thái của đơn hàng.
+Admin sẽ thao tác Xác nhận hoặc Từ chối:
+ <img width="1919" height="1073" alt="Screenshot 2025-10-20 174327" src="https://github.com/user-attachments/assets/c68f0442-17df-482e-8023-6c4771cd78c0" />
+
+TEST: Từ chối đơn hàng
+ <img width="1512" height="942" alt="Screenshot 2025-10-20 174407" src="https://github.com/user-attachments/assets/bc149aee-5b03-44b1-84ef-689523749ad4" />
+Sau khi từ chối, lập tức email từ chối đơn hàng được gửi về user.
+ 
+TEST: Xác nhận đơn hàng
+ <img width="1919" height="1061" alt="Screenshot 2025-10-20 174451" src="https://github.com/user-attachments/assets/d35b8d8a-0717-470f-b427-f3e0398acb78" />
+
+Sau khi xác nhận đơn hàng, ngay lập tức email xác nhận được gửi về cho user kèm mã OTP.
+<img width="1542" height="950" alt="Screenshot 2025-10-20 174539" src="https://github.com/user-attachments/assets/b5f09253-f3c2-42ec-a5cc-5257717b54a6" />
+<img width="1902" height="1079" alt="Screenshot 2025-10-20 180355" src="https://github.com/user-attachments/assets/41fe8a51-d169-41b0-8427-4c1e5e263049" />
+
+Mã OTP này sẽ để phát triển bảo mật sản phẩm cho user, nhằm đảm bảo tính độc quyền của sản phẩm.
+
+
 
 
